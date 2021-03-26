@@ -2,27 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:voice_recorder/widgets/playing_animate_widget.dart';
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(),
@@ -33,21 +24,11 @@ class MyApp extends StatelessWidget {
 typedef _Fn = void Function();
 
 class MyHomePage extends StatefulWidget {
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   FlutterSoundPlayer? _mPlayer = FlutterSoundPlayer();
   FlutterSoundRecorder? _mRecorder = FlutterSoundRecorder();
   bool _mPlayerIsInited = false;
@@ -94,13 +75,10 @@ class _MyHomePageState extends State<MyHomePage> {
     _mRecorderIsInited = true;
   }
 
-  // ----------------------  Here is the code for recording and playback -------
-
   void record() {
     _mRecorder!
         .startRecorder(
       toFile: _mPath,
-      //codec: kIsWeb ? Codec.opusWebM : Codec.aacADTS,
     )
         .then((value) {
       setState(() {});
@@ -110,7 +88,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void stopRecorder() async {
     await _mRecorder!.stopRecorder().then((value) {
       setState(() {
-        //var url = value;
         _mplaybackReady = true;
       });
     });
@@ -124,7 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
     _mPlayer!
         .startPlayer(
             fromURI: _mPath,
-            //codec: kIsWeb ? Codec.opusWebM : Codec.aacADTS,
             whenFinished: () {
               setState(() {});
             })
@@ -138,8 +114,6 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {});
     });
   }
-
-// ----------------------------- UI --------------------------------------------
 
   _Fn? getRecorderFn() {
     if (!_mRecorderIsInited || !_mPlayer!.isStopped) {
@@ -155,22 +129,13 @@ class _MyHomePageState extends State<MyHomePage> {
     return _mPlayer!.isStopped ? play : stopPlayer;
   }
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     Widget makeBody() {
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          PlayingAnimateWidget(),
           Container(
             margin: const EdgeInsets.all(3),
             padding: const EdgeInsets.all(3),
@@ -178,13 +143,14 @@ class _MyHomePageState extends State<MyHomePage> {
             width: double.infinity,
             alignment: Alignment.center,
             decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(150)),
               color: Color(0xFFFAF0E6),
               border: Border.all(
                 color: Colors.indigo,
                 width: 3,
               ),
             ),
-            child: Row(children: [
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               ElevatedButton(
                 onPressed: getRecorderFn(),
                 //color: Colors.white,
@@ -206,17 +172,16 @@ class _MyHomePageState extends State<MyHomePage> {
             width: double.infinity,
             alignment: Alignment.center,
             decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(150)),
               color: Color(0xFFFAF0E6),
               border: Border.all(
                 color: Colors.indigo,
                 width: 3,
               ),
             ),
-            child: Row(children: [
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               ElevatedButton(
                 onPressed: getPlaybackFn(),
-                //color: Colors.white,
-                //disabledColor: Colors.grey,
                 child: Text(_mPlayer!.isPlaying ? 'Stop' : 'Play'),
               ),
               SizedBox(
@@ -232,7 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.blue,
+      // backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Simple Recorder'),
       ),
